@@ -1,28 +1,36 @@
 const mongoose = require('mongoose');
-const ContactSchema = mongoose.Schema({
+const ForumSchema = mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'users',
   },
-  name: {
+  name:{
+    type:String,
+  },
+  topic: {
     type: String,
     required: true,
   },
-  email: {
+  body: {
     type: String,
     required: true,
   },
-  phone: {
-    type: String,
+  likes: {
+    type: Number,
+    default: 0,
   },
-  type: {
-    type: String,
-    default: 'Personal',
+  commentstotal: {
+    type: Number,
+    default: 0,
+  },
+  comments: {
+    type: Object,
   },
   date: {
     type: Date,
     default: Date.now,
   },
 });
+ForumSchema.index({'$**': 'text'});
 
-module.exports = mongoose.model('Contact', ContactSchema);
+module.exports = mongoose.model('Forum', ForumSchema);

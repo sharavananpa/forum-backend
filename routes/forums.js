@@ -3,32 +3,33 @@ const Router = express.Router();
 const { check, validationResult } = require('express-validator');
 const User = require('../models/User');
 const auth = require('../middleware/auth.js');
-const Contact = require('../models/Contacts');
+const Forum = require('../models/Forum');
 // @route    POST api/users
 // @desc     Register a user
 // @access   Private
 
 Router.post(
   '/',
-  [auth, [check('name', 'Name is required').not().isEmpty()]],
+  auth,
   async (req, res) => {
-    errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      res.status(400).json({ errors: errors.array() });
-    }
+    
 
-    const { name, email, phone, type } = req.body;
+    const { name, topic, body, likes, commentstotal, comments } = req.body;
 
-    try {
-      const newContact = new Contact({
-        name,
-        email,
-        phone,
-        type,
-        user: req.user.id,
-      });
-      const contact = await newContact.save();
-      return res.json(contact);
+  try {
+    const newForum = new Forum({
+      name: req.user.name,
+      topic,
+      body,
+      likes,
+      commentstotal,
+      comments,
+      user: req.user.id,
+    });
+
+      const forum = await newForum.save();
+
+      return res.json(forum);
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server Error');
@@ -42,10 +43,11 @@ Router.post(
 
 Router.get('/', auth, async (req, res) => {
   try {
-    const contacts = await Contact.find({ user: req.user.id }).sort({
+    const {text} = req.body;
+    const forums = await Forum.find({$text: {$search: text}}).sort({
       date: -1,
     });
-    return res.json(contacts);
+    return res.json(forums);
   } catch (err) {
     console.error(err);
     return res.status(500).send('Server Error');
